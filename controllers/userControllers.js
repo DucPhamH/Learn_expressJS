@@ -18,7 +18,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
     res.status(400).json({ message: "Bạn nhập sai độ dài email" });
     throw new Error("sai do dai");
   }
-  if (password.length <= 6 || password.length >= 160) {
+  if (password.length <= 5 || password.length >= 160) {
     res.status(400).json({ message: "Bạn nhập sai độ dài password" });
     throw new Error("sai do dai");
   }
@@ -59,7 +59,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
     res.status(400).json({ message: "Bạn nhập sai độ dài email" });
     throw new Error("sai do dai");
   }
-  if (password.length <= 6 || password.length >= 160) {
+  if (password.length <= 5 || password.length >= 160) {
     res.status(400).json({ message: "Bạn nhập sai độ dài password" });
     throw new Error("sai do dai");
   }
@@ -78,18 +78,42 @@ const loginUser = asyncHandler(async (req, res, next) => {
     console.log(accessToken);
     res.status(200).json({
       message: "Đăng nhập thành công",
-      data: { accessToken: accessToken, user: user },
+      data: { accessToken: "Bearer" + " " + accessToken, user: user },
     });
   } else {
-    res.status(401);
-    throw new Error("Đăng nhập thất bại");
+    res.status(400).json({ message: "Bạn sai tài khoản hoặc mật khẩu" });
+    throw new Error("Bạn sai tài khoản hoặc mật khẩu");
   }
 });
 
 const currentUser = asyncHandler(async (req, res, next) => {
   console.log(req.user);
 
+  const _ID = req.user._id;
+  const userLogin = await UserModel.findOne({ _id: _ID });
+  if (userLogin) {
+    res.status(200).json({ message: "Lấy thành công", data: userLogin });
+  } else {
+    res.status(400).json({ message: "Bạn không có quyền" });
+    throw new Error("Bạn không có quyền");
+  }
+
   res.json("curent");
 });
 
-module.exports = { registerUser, loginUser, currentUser };
+const uploadImageUser = asyncHandler(async (req, res, next) => {
+  console.log("localhost:4000/" + req.file.path.replace(/\\/g, "/"));
+  res.json({ message: "Đăng xuất thành công" });
+});
+
+const logoutUser = asyncHandler(async (req, res, next) => {
+  res.json({ message: "Đăng xuất thành công" });
+});
+
+module.exports = {
+  registerUser,
+  loginUser,
+  currentUser,
+  logoutUser,
+  uploadImageUser,
+};
